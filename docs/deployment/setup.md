@@ -73,6 +73,28 @@ curl http://localhost:8000/api/v1/health
 
 ## 生产部署建议
 
+### Docker Compose 部署（推荐）
+
+项目已提供 `Dockerfile` 和 `docker-compose.yml`，支持 Docker 部署。
+
+#### 构建并启动
+
+```bash
+cd d:\Work\openapi-service
+
+# 确保 .env 文件已配置好生产环境的数据库连接
+# 构建镜像并启动
+.venv\Scripts\docker-compose up -d --build
+```
+
+#### 连接到现有 Docker 网络
+
+`docker-compose.yml` 默认连接到外部网络 `app_network`，如果您的 Nginx 在其他 Docker 网络中运行，请修改 `docker-compose.yml` 中的网络名称。
+
+### Nginx 反向代理配置
+
+参考 `docs/deployment/nginx-openapi.conf` 中的配置。
+
 ### 使用 Gunicorn + Uvicorn Workers
 
 ```bash
