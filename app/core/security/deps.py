@@ -2,7 +2,8 @@ from fastapi import Depends, Header, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions.handlers import AuthenticationError, InvalidSignatureError
+from app.config import settings
+from app.core.exceptions.handlers import AuthenticationError, InvalidSignatureError, PermissionDenied
 from app.core.security.auth import verify_signature
 from app.database import get_db
 from app.models.api_key import ApiKey
@@ -47,3 +48,14 @@ async def require_auth(
     )
 
     return api_key
+
+
+async def require_admin(
+    x_admin_key: str = Header(..., alias="X-Admin-Key"),
+) -> None:
+    """管理员主密钥认证依赖注入，保护 API Key 管理接口"""
+    if not x_admin_key:
+        raise PermissionDenied("缺少管理员密钥")
+    if x_admin_key != settings.ADMIN_API_KEY:
+        raise PermissionDenied("无效的管理员密钥")
+    return None

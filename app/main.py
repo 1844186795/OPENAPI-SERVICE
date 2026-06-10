@@ -63,3 +63,4 @@ async def root():
 @app.get("/api/v1/health", summary="健康检查", description="健康检查接口，用于监控服务运行状态。返回 OK 表示服务正常。")
 async def health_check():
     """健康检查"""
+    return success(message="OK")

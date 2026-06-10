@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     APP_PORT: int = 8000
     ROOT_PATH: str = ""
 
+    # Admin
+    ADMIN_API_KEY: str = "admin_sk_yourtoken123"
+
     # Database
     MYSQL_HOST: str = "localhost"
     MYSQL_PORT: int = 3306

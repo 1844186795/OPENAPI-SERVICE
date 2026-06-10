@@ -19,6 +19,12 @@
 | `APP_PORT` | `8000` | 服务监听端口 |
 | `ROOT_PATH` | `` | 反向代理路径前缀（如 `/openapi`），空字符串表示无前缀 |
 
+### 管理员配置
+
+| 变量名 | 默认值 | 说明 |
+|--------|--------|------|
+| `ADMIN_API_KEY` | `admin_sk_yourtoken123` | 管理员主密钥，用于管理 API Key 的申请、查看和撤销，**请务必修改为随机生成的值** |
+
 ### 数据库配置
 
 | 变量名 | 默认值 | 说明 |
@@ -39,6 +45,7 @@ APP_NAME=OpenAPI Service
 APP_DEBUG=true
 APP_HOST=0.0.0.0
 APP_PORT=8000
+ADMIN_API_KEY=admin_sk_yourtoken123
 
 # ============================
 # Database Configuration

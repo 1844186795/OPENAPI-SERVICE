@@ -1,8 +1,44 @@
 # API 接口认证说明
 
-## 认证方式：API Key + HMAC-SHA256 签名
+## 认证方式
 
-本服务使用 API Key + HMAC-SHA256 签名的方式进行接口认证，确保请求的合法性、完整性和防重放。
+本服务提供两种认证方式：
+
+1. **Admin 主密钥认证**：用于管理接口（申请/查看/撤销 API Key），通过 `X-Admin-Key` 请求头传递
+2. **API Key + HMAC-SHA256 签名认证**：用于业务接口认证，确保请求的合法性、完整性和防重放
+
+## 管理接口认证（Admin 主密钥）
+
+管理 API Key 的接口（申请、查看列表、撤销）需要使用 Admin 主密钥进行认证。
+
+### 认证方式
+
+在请求头中携带 `X-Admin-Key`：
+
+| Header | 说明 | 示例 |
+|--------|------|------|
+| `X-Admin-Key` | 管理员主密钥，配置在 `.env` 的 `ADMIN_API_KEY` | `admin_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+
+### 管理接口列表
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/auth/apply` | POST | 申请新的 API Key |
+| `/api/v1/auth/keys` | GET | 查看所有 API Key |
+| `/api/v1/auth/revoke` | POST | 撤销 API Key |
+
+### 使用示例
+
+```bash
+curl -X POST "https://juntuo.cc/openapi/api/v1/auth/apply" \
+  -H "X-Admin-Key: admin_sk_yourtoken123" \
+  -H "Content-Type: application/json" \
+  -d '{"app_name": "我的应用"}'
+```
+
+## 业务接口认证（API Key + HMAC-SHA256 签名）
+
+业务接口需要使用 API Key + HMAC-SHA256 签名的方式进行认证。
 
 ## 申请 API Key
 
