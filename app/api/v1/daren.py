@@ -9,8 +9,8 @@ from app.core.excel.daren_parser import DarenOrderParser
 from app.core.security.deps import require_auth, require_auth_simple
 from app.database import get_db
 from app.models.api_key import ApiKey
-from app.schemas.daren import OrderInfo, OrderListResponse, UploadResult
-from app.schemas.response import success
+from app.schemas.daren import OrderInfo
+from app.schemas.response import PageResponse, UploadResult, success
 from app.services import daren as daren_service
 
 logger = logging.getLogger("openapi-service")
@@ -124,7 +124,7 @@ async def list_orders(
     )
 
     return success(
-        data=OrderListResponse(
+        data=PageResponse[OrderInfo](
             total=total,
             page=page,
             page_size=page_size,

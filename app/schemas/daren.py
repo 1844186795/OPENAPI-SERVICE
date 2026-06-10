@@ -1,17 +1,8 @@
 """达人数据响应模型"""
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
-
-
-class UploadResult(BaseModel):
-    """上传导入结果"""
-    batch_id: str = Field(description="上传批次标识")
-    total_rows: int = Field(description="总行数")
-    success_rows: int = Field(description="成功导入行数")
-    failed_rows: int = Field(description="失败行数")
-    failures: list[dict] = Field(default_factory=list, description="失败详情列表")
 
 
 class OrderInfo(BaseModel):
@@ -47,11 +38,3 @@ class OrderInfo(BaseModel):
     settlement_time: Optional[datetime] = Field(None, description="佣金结算时间")
     platform: Optional[str] = Field(None, description="平台")
     created_at: Optional[datetime] = Field(None, description="导入时间")
-
-
-class OrderListResponse(BaseModel):
-    """订单列表响应"""
-    total: int = Field(description="总条数")
-    page: int = Field(description="当前页码")
-    page_size: int = Field(description="每页条数")
-    items: list[OrderInfo] = Field(default_factory=list, description="订单列表")

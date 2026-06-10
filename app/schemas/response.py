@@ -1,6 +1,25 @@
-from typing import Any, Optional
+from typing import Any, Generic, Optional, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+DataT = TypeVar("DataT")
+
+
+class PageResponse(BaseModel, Generic[DataT]):
+    """通用分页响应"""
+    total: int = 0
+    page: int = 1
+    page_size: int = 20
+    items: list[DataT] = []
+
+
+class UploadResult(BaseModel):
+    """上传导入结果"""
+    batch_id: str = Field(description="上传批次标识")
+    total_rows: int = Field(description="总行数")
+    success_rows: int = Field(description="成功导入行数")
+    failed_rows: int = Field(description="失败行数")
+    failures: list[dict] = Field(default_factory=list, description="失败详情列表")
 
 
 class APIResponse(BaseModel):
