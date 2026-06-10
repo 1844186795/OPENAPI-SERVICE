@@ -9,16 +9,16 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# 使用国内 PyPI 镜像源加速依赖下载
-# 使用清华大学 PyPI 镜像源
-ENV UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/
+# 使用中科大 PyPI 镜像源加速依赖下载
+# 如果镜像源不可用，可删除 --index-url 参数回退到官方源
+ENV UV_INDEX_URL=https://mirrors.ustc.edu.cn/pypi/web/simple/
 
 # 先复制依赖清单，利用 Docker 层缓存加速重复构建
 COPY pyproject.toml uv.lock ./
 
 # 仅安装生产环境依赖（不安装开发依赖）
-# --index-url 显式指定镜像源，与 ENV 双保险
-RUN uv sync --frozen --no-dev --index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+# 注意：显式传递 UV_INDEX_URL 环境变量给 uv build 步骤使用
+RUN UV_INDEX_URL=https://mirrors.ustc.edu.cn/pypi/web/simple/ uv sync --frozen --no-dev
 
 
 # ============================================================
