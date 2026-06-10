@@ -9,6 +9,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
+# 使用国内 PyPI 镜像源加速依赖下载（阿里云镜像）
+ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+
 # 先复制依赖清单，利用 Docker 层缓存加速重复构建
 COPY pyproject.toml uv.lock ./
 
