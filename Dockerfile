@@ -18,7 +18,7 @@ COPY pyproject.toml uv.lock ./
 
 # 仅安装生产环境依赖（不安装开发依赖）
 # 注意：显式传递 UV_INDEX_URL 环境变量给 uv build 步骤使用
-RUN uv sync --frozen --no-dev
+RUN uv sync
 
 
 # ============================================================
