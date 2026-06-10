@@ -120,5 +120,10 @@ class BaseExcelParser(ABC):
             result.data.append(parsed)
             result.success_rows += 1
 
+        # 为每条数据附加 Excel 行号（用于错误报告）
+        # 重新遍历并设置行号（enumerate 可正确反映顺序位置）
+        for idx, item in enumerate(result.data, start=2):
+            item["_excel_row"] = idx
+
         workbook.close()
         return result

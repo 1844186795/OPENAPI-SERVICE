@@ -25,7 +25,7 @@ async def batch_import_orders(
 
     Args:
         db: 数据库会话
-        data: 解析后的订单数据列表
+        data: 解析后的订单数据列表（含 _excel_row 行号）
         batch_id: 上传批次标识
 
     Returns:
@@ -35,6 +35,7 @@ async def batch_import_orders(
     failures = []
 
     for item in data:
+        row_num = item.pop("_excel_row", "-")
         try:
             # 检查 order_id 是否已存在
             result = await db.execute(
@@ -42,7 +43,7 @@ async def batch_import_orders(
             )
             existing = result.scalar_one_or_none()
             if existing:
-                failures.append({"row": "-", "reason": f"订单ID {item['order_id']} 已存在"})
+                failures.append({"row": row_num, "reason": f"订单ID {item['order_id']} 已存在"})
                 continue
 
             # 构造模型实例（日期已在解析器中转为 ISO 格式字符串）
@@ -61,7 +62,7 @@ async def batch_import_orders(
             success_count += 1
 
         except Exception as e:
-            failures.append({"row": "-", "reason": str(e)})
+            failures.append({"row": row_num, "reason": str(e)})
 
     return success_count, failures
 
