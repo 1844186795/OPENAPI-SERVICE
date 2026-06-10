@@ -14,9 +14,9 @@
     env_file:
       - .env
     networks:
-      - app_network
+      - letever-flask-program_app_network
 
-# 连接到已有的 app_network（由 juntuo.cc 项目创建）
+# 连接到已有的 juntuo.cc 项目的网络
 networks:
-  app_network:
+  letever-flask-program_app_network:
     external: true
