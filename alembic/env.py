@@ -11,6 +11,7 @@ from app.database import Base
 
 # Import all models so they are registered on Base.metadata
 from app.models.api_key import ApiKey  # noqa: F401
+from app.models.affiliate_order import AffiliateOrder  # noqa: F401
 
 # Alembic Config object
 config = context.config

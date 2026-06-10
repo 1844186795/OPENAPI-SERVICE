@@ -36,3 +36,6 @@ alembic/versions/*.pyc
 # test
 test.*
 test/
+
+# demand
+demand/*

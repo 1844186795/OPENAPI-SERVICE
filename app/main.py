@@ -14,6 +14,7 @@ from app.core.exceptions.handlers import (
     validation_exception_handler,
 )
 from app.api.v1.auth import router as auth_router
+from app.api.v1.daren import router as daren_router
 from app.core.middleware.logging import RequestLoggingMiddleware
 from app.schemas.response import success
 
@@ -49,6 +50,7 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # --- 注册路由 ---
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(daren_router, prefix="/api/v1")
 
 # --- 注册中间件 ---
 app.add_middleware(RequestLoggingMiddleware)
