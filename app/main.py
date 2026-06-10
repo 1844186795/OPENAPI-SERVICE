@@ -33,6 +33,9 @@ app = FastAPI(
     title=settings.APP_NAME,
     version="0.1.0",
     root_path=settings.ROOT_PATH,
+    servers=[
+        {"url": "/openapi", "description": "OpenAPI 服务（反向代理路径）"}
+    ] if settings.ROOT_PATH else None,
     docs_url="/api/v1/docs",
     redoc_url="/api/v1/redoc",
     lifespan=lifespan,
