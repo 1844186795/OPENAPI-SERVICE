@@ -59,3 +59,33 @@ async def require_admin(
     if x_admin_key != settings.ADMIN_API_KEY:
         raise PermissionDenied("无效的管理员密钥")
     return None
+
+
+async def require_auth_simple(
+    request: Request,
+    x_app_id: str = Header(..., alias="X-App-ID"),
+    x_signature: str = Header(..., alias="X-Signature"),
+    x_timestamp: str = Header(..., alias="X-Timestamp"),
+    x_nonce: str = Header(..., alias="X-Nonce"),
+    db: AsyncSession = Depends(get_db),
+) -> ApiKey:
+    """API Key 认证依赖注入（不校验请求体，适用于文件上传等场景）"""
+    if not x_app_id or not x_signature or not x_timestamp or not x_nonce:
+        raise AuthenticationError("缺少认证请求头")
+
+    api_key = await get_api_key_by_app_id(db, x_app_id)
+    if not api_key:
+        raise AuthenticationError("无效的 API Key")
+
+    # 校验签名但不读取 body（文件上传场景 body 为二进制数据）
+    verify_signature(
+        api_key=api_key,
+        signature=x_signature,
+        timestamp=x_timestamp,
+        nonce=x_nonce,
+        method=request.method,
+        path=request.url.path,
+        body=None,
+    )
+
+    return api_key

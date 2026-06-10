@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.excel.base_validator import FileValidationError
 from app.core.excel.daren_parser import DarenOrderParser
+from app.core.security.deps import require_auth, require_auth_simple
 from app.database import get_db
+from app.models.api_key import ApiKey
 from app.schemas.daren import OrderInfo, OrderListResponse, UploadResult
 from app.schemas.response import success
 from app.services import daren as daren_service
@@ -17,10 +19,11 @@ router = APIRouter(prefix="/daren", tags=["达人数据"])
 
 
 @router.post("/upload", response_model=None, summary="上传导入达人订单",
-             description="上传 .xlsx 格式的达人订单文件，解析后批量导入数据库。文件需符合指定格式（30列表头完全一致）。")
+             description="上传 .xlsx 格式的达人订单文件，解析后批量导入数据库。文件需符合指定格式（30列表头完全一致）。需要携带有效的 API Key 进行身份认证。")
 async def upload_orders(
     file: UploadFile = File(..., description="达人订单 Excel 文件（.xlsx）"),
     db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_auth_simple),
 ):
     """上传达人订单 Excel 文件并导入数据库"""
     # 读取文件内容
@@ -102,13 +105,14 @@ async def upload_orders(
 
 
 @router.get("/orders", response_model=None, summary="查询达人订单列表",
-            description="分页查询已导入的达人订单数据，支持按达人用户名和订单状态筛选。")
+            description="分页查询已导入的达人订单数据，支持按达人用户名和订单状态筛选。需要携带有效的 API Key 进行身份认证。")
 async def list_orders(
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页条数"),
     influencer_username: str = Query(None, description="达人用户名（筛选）"),
     order_status: str = Query(None, description="订单状态（筛选）"),
     db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_auth),
 ):
     """查询达人订单列表"""
     items, total = await daren_service.get_order_list(
