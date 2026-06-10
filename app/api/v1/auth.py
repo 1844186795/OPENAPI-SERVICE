@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions.handlers import BusinessError
@@ -12,12 +12,12 @@ from app.services import api_key as api_key_service
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/apply", response_model=None)
+@router.post("/apply", response_model=None, summary="申请 API Key", description="创建一个新的 API Key，返回 app_id 和 client_secret，client_secret 只会在创建时显示一次，请妥善保存。")
 async def apply_api_key(
     req: ApiKeyCreateRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """Apply for a new API Key."""
+    """申请新的 API Key"""
     if req.expires_at:
         from datetime import datetime, timezone
 
@@ -45,12 +45,12 @@ async def apply_api_key(
     )
 
 
-@router.get("/keys", response_model=None)
+@router.get("/keys", response_model=None, summary="获取 API Key 列表", description="获取所有已申请的 API Key 列表，需要携带有效的 API Key 进行身份认证。")
 async def list_api_keys(
     db: AsyncSession = Depends(get_db),
     _: ApiKey = Depends(require_auth),
 ):
-    """List all API Keys (requires authentication)."""
+    """获取 API Key 列表（需要认证）"""
     items, total = await api_key_service.get_api_key_list(db)
 
     return success(
@@ -71,12 +71,12 @@ async def list_api_keys(
     )
 
 
-@router.post("/revoke", response_model=None)
+@router.post("/revoke", response_model=None, summary="撤销 API Key", description="根据 app_id 撤销指定的 API Key，撤销后该 Key 将无法继续使用。需要携带有效的 API Key 进行身份认证。")
 async def revoke_api_key(
-    app_id: str,
+    app_id: str = Query(..., description="要撤销的应用标识（app_id）"),
     db: AsyncSession = Depends(get_db),
     _: ApiKey = Depends(require_auth),
 ):
-    """Revoke an API Key (requires authentication)."""
+    """撤销 API Key（需要认证）"""
     await api_key_service.revoke_api_key(db, app_id)
     return success(message="API Key has been revoked")
