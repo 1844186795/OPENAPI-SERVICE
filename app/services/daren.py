@@ -99,7 +99,8 @@ async def get_order_list(
     total = total_result.scalar() or 0
 
     # 分页
-    query = query.order_by(AffiliateOrder.created_time.desc().nullslast())
+    # MySQL 不支持 NULLS LAST 语法，用 IS NULL 排序替代（NULL 值排在最后）
+    query = query.order_by(AffiliateOrder.created_time.is_(None), AffiliateOrder.created_time.desc())
     query = query.offset((page - 1) * page_size).limit(page_size)
 
     result = await db.execute(query)
