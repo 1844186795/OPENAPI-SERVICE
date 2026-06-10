@@ -10,7 +10,7 @@
     environment:
       TZ: "Asia/Shanghai"
     ports:
-      - "8001:8001"
+      - "8002:8001"
     env_file:
       - .env
     networks:
