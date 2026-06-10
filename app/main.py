@@ -32,6 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version="0.1.0",
+    root_path=settings.ROOT_PATH,
     docs_url="/api/v1/docs",
     redoc_url="/api/v1/redoc",
     lifespan=lifespan,

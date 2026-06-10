@@ -93,7 +93,19 @@ cd d:\Work\openapi-service
 
 ### Nginx 反向代理配置
 
-参考 `docs/deployment/nginx-openapi.conf` 中的配置。
+在现有 nginx.conf 的 server 块中添加以下 location（参考 `docs/deployment/nginx-openapi.conf`）：
+
+```nginx
+location /openapi/ {
+    proxy_pass http://openapi-service:8001/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+> 注意：如果部署路径不是 `/openapi/`，需要同步修改 `.env` 中的 `ROOT_PATH` 变量，以保证 Swagger 文档 URL 正确。
 
 ### 使用 Gunicorn + Uvicorn Workers
 

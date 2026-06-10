@@ -1,0 +1,22 @@
+﻿services:
+  # OpenAPI 服务
+  openapi-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openapi-service
+    container_name: openapi-service
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
+    expose:
+      - "8001"
+    env_file:
+      - .env
+    networks:
+      - app_network
+
+# 连接到已有的 app_network（由 juntuo.cc 项目创建）
+networks:
+  app_network:
+    external: true
