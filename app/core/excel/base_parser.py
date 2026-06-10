@@ -85,20 +85,21 @@ class BaseExcelParser(ABC):
         # 第一阶段：基本校验
         self.validator.validate_file(filename, content_type, len(file_content))
 
-        # 加载 Excel 文件
-        workbook = load_workbook(BytesIO(file_content), read_only=True, data_only=True)
+        # 加载 Excel 文件（不使用 read_only 模式，因为需要 max_row 等属性）
+        workbook = load_workbook(BytesIO(file_content), data_only=True)
         ws = workbook.active
 
         # 第二阶段：结构校验
         if not self.validator.validate_structure(workbook):
             raise ValueError(self.validator.errors[-1])
 
-        # 获取表头
-        headers = [cell.value for cell in list(ws.iter_rows(min_row=1, max_row=1))[0]]
+        # 获取表头（去除首尾空格）
+        headers = [(cell.value.strip() if cell.value else "") for cell in list(ws.iter_rows(min_row=1, max_row=1))[0]]
 
         # 第三阶段：表头校验
         if not self.validator.validate_headers(headers, self.expected_headers):
-            raise ValueError("; ".join(self.validator.errors))
+            error_msg = "; ".join(self.validator.errors)
+            raise ValueError(error_msg if error_msg else "表头不匹配，请使用模板文件上传")
 
         # 解析数据行
         result = ParseResult()
