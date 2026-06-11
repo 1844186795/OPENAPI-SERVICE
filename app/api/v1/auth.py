@@ -42,7 +42,7 @@ async def apply_api_key(
             app_name=api_key.app_name,
             client_secret=api_key.client_secret,
             expires_at=api_key.expires_at,
-        ).model_dump(),
+        ),
         message="API Key created successfully. Please save the client_secret as it will not be shown again.",
     )
 
@@ -71,7 +71,7 @@ async def list_api_keys(
                 )
                 for item in items
             ],
-        ).model_dump()
+        )
     )
 
 

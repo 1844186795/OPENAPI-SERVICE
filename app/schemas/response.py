@@ -7,10 +7,10 @@ DataT = TypeVar("DataT")
 
 class PageResponse(BaseModel, Generic[DataT]):
     """通用分页响应"""
-    total: int = 0
-    page: int = 1
-    page_size: int = 20
-    items: list[DataT] = []
+    total: int = Field(0, description="数据总数")
+    page: int = Field(1, description="当前页码")
+    page_size: int = Field(20, description="每页条数")
+    items: list[DataT] = Field(default_factory=list, description="数据列表")
 
 
 class UploadResult(BaseModel):
@@ -29,9 +29,9 @@ class LatestUploadDateResponse(BaseModel):
 
 class APIResponse(BaseModel, Generic[DataT]):
     """统一响应格式"""
-    code: int = 0
-    message: str = "success"
-    data: Optional[DataT] = None
+    code: int = Field(0, description="状态码，0 表示成功，非 0 表示错误")
+    message: str = Field("success", description="响应消息，成功为 success，失败时包含错误描述")
+    data: Optional[DataT] = Field(None, description="响应数据，结构由具体接口定义")
 
 
 def success(data: Any = None, message: str = "success") -> APIResponse[Any]:
