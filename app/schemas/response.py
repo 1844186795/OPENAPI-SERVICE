@@ -22,6 +22,11 @@ class UploadResult(BaseModel):
     failures: list[dict] = Field(default_factory=list, description="失败详情列表")
 
 
+class LatestUploadDateResponse(BaseModel):
+    """最大上传日期响应"""
+    latest_upload_date: Optional[str] = Field(None, description="最大上传日期，格式 yyyy-MM-dd")
+
+
 class APIResponse(BaseModel):
     """统一响应格式"""
     code: int = 0

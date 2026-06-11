@@ -3,10 +3,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.core.exceptions.handlers import AuthenticationError, InvalidSignatureError, PermissionDenied
+from app.core.exceptions.handlers import AuthenticationError, PermissionDenied, ApiKeyExpiredError
 from app.core.security.auth import verify_signature
 from app.database import get_db
 from app.models.api_key import ApiKey
+import time
 
 
 async def get_api_key_by_app_id(db: AsyncSession, app_id: str) -> ApiKey | None:
@@ -30,6 +31,13 @@ async def require_auth(
     api_key = await get_api_key_by_app_id(db, x_app_id)
     if not api_key:
         raise AuthenticationError("无效的 API Key")
+
+    # 检查是否过期，若过期则同步更新状态
+    if api_key.expires_at and time.time() > api_key.expires_at.timestamp():
+        api_key.status = "expired"
+        db.add(api_key)
+        await db.flush()
+        raise ApiKeyExpiredError()
 
     body = None
     if request.method in ("POST", "PUT", "PATCH"):
@@ -76,6 +84,13 @@ async def require_auth_simple(
     api_key = await get_api_key_by_app_id(db, x_app_id)
     if not api_key:
         raise AuthenticationError("无效的 API Key")
+
+    # 检查是否过期，若过期则同步更新状态
+    if api_key.expires_at and time.time() > api_key.expires_at.timestamp():
+        api_key.status = "expired"
+        db.add(api_key)
+        await db.flush()
+        raise ApiKeyExpiredError()
 
     # 校验签名但不读取 body（文件上传场景 body 为二进制数据）
     verify_signature(

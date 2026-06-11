@@ -1,7 +1,7 @@
 """达人订单模型"""
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, DECIMAL, Integer, String, UniqueConstraint
+from sqlalchemy import Date, DateTime, DECIMAL, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
@@ -10,13 +10,11 @@ from app.models.base import BaseModel
 class AffiliateOrder(BaseModel):
     """TikTok Shop 达人带货订单表"""
     __tablename__ = "affiliate_orders"
-    __table_args__ = (
-        UniqueConstraint("order_id", name="uq_affiliate_orders_order_id"),
-        {"comment": "达人订单表"},
-    )
+    __table_args__ = {"comment": "达人订单表"}
 
     # 批次追踪
     upload_batch_id: Mapped[str] = mapped_column(String(64), nullable=False, comment="上传批次标识")
+    upload_date: Mapped[date] = mapped_column(Date, server_default=func.current_date(), nullable=False, comment="上传日期")
 
     # 订单基本信息
     order_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True, comment="订单ID")
@@ -32,7 +30,7 @@ class AffiliateOrder(BaseModel):
     order_status: Mapped[str | None] = mapped_column(String(32), nullable=True, comment="订单状态")
 
     # 达人信息
-    influencer_username: Mapped[str | None] = mapped_column(String(128), nullable=False, index=True, comment="达人用户名")
+    influencer_username: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True, comment="达人用户名")
     content_type: Mapped[str | None] = mapped_column(String(16), nullable=True, comment="内容形式（视频/直播）")
     content_id: Mapped[str | None] = mapped_column(String(64), nullable=True, comment="内容ID")
 

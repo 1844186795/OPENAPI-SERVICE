@@ -1,6 +1,6 @@
 """达人数据业务逻辑层"""
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Optional
 
 from sqlalchemy import func, select
@@ -20,13 +20,15 @@ async def batch_import_orders(
     db: AsyncSession,
     data: list[dict],
     batch_id: str,
+    upload_date: date,
 ) -> tuple[int, list[dict]]:
-    """批量导入达人订单数据
+    """批量导入达人订单数据（不做去重校验，全部插入）
 
     Args:
         db: 数据库会话
         data: 解析后的订单数据列表（含 _excel_row 行号）
         batch_id: 上传批次标识
+        upload_date: 上传日期
 
     Returns:
         (成功数, 失败详情列表)
@@ -37,18 +39,10 @@ async def batch_import_orders(
     for item in data:
         row_num = item.pop("_excel_row", "-")
         try:
-            # 检查 order_id 是否已存在
-            result = await db.execute(
-                select(AffiliateOrder).where(AffiliateOrder.order_id == item["order_id"])
-            )
-            existing = result.scalar_one_or_none()
-            if existing:
-                failures.append({"row": row_num, "reason": f"订单ID {item['order_id']} 已存在"})
-                continue
-
             # 构造模型实例（日期已在解析器中转为 ISO 格式字符串）
             order = AffiliateOrder(
                 upload_batch_id=batch_id,
+                upload_date=upload_date,
                 **{k: v for k, v in item.items() if k not in ("created_time", "payment_time", "delivery_time", "settlement_time")},
             )
             # 处理时间字段（ISO 字符串转 datetime）
@@ -107,3 +101,18 @@ async def get_order_list(
     items = list(result.scalars().all())
 
     return items, total
+
+
+async def get_latest_upload_date(db: AsyncSession) -> Optional[date]:
+    """查询表中最大的上传日期
+
+    Args:
+        db: 数据库会话
+
+    Returns:
+        最大上传日期，表为空时返回 None
+    """
+    result = await db.execute(
+        select(func.max(AffiliateOrder.upload_date))
+    )
+    return result.scalar()

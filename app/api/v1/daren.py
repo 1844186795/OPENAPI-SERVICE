@@ -1,5 +1,6 @@
 """达人数据导入与查询 API"""
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +11,7 @@ from app.core.security.deps import require_auth, require_auth_simple
 from app.database import get_db
 from app.models.api_key import ApiKey
 from app.schemas.daren import OrderInfo
-from app.schemas.response import PageResponse, UploadResult, success
+from app.schemas.response import LatestUploadDateResponse, PageResponse, UploadResult, success
 from app.services import daren as daren_service
 
 logger = logging.getLogger("openapi-service")
@@ -75,24 +76,23 @@ async def upload_orders(
 
     # 导入数据库
     batch_id = daren_service.generate_batch_id()
+    upload_date = datetime.now(timezone.utc).date()
     success_count, import_failures = await daren_service.batch_import_orders(
         db=db,
         data=parse_result.data,
         batch_id=batch_id,
+        upload_date=upload_date,
     )
-
-    # 合并解析失败和导入失败的记录
-    all_failures = parse_result.failures + [
-        {"row": f["row"], "reason": f["reason"]}
-        for f in import_failures
-    ]
 
     result = UploadResult(
         batch_id=batch_id,
         total_rows=parse_result.total_rows,
         success_rows=success_count,
         failed_rows=parse_result.total_rows - success_count,
-        failures=all_failures,
+        failures=parse_result.failures + [
+            {"row": f["row"], "reason": f["reason"]}
+            for f in import_failures
+        ],
     )
 
     if result.failed_rows == 0:
@@ -161,8 +161,24 @@ async def list_orders(
                     settlement_time=item.settlement_time,
                     platform=item.platform,
                     created_at=item.created_at,
+                    upload_date=str(item.upload_date) if item.upload_date else None,
                 )
                 for item in items
             ],
+        ).model_dump()
+    )
+
+
+@router.get("/latest-upload-date", response_model=None, summary="查询最大上传日期",
+            description="查询已导入的达人订单数据中最大的上传日期，用于了解数据同步进度。需要携带有效的 API Key 进行身份认证。")
+async def latest_upload_date(
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_auth),
+):
+    """查询最大上传日期"""
+    max_date = await daren_service.get_latest_upload_date(db)
+    return success(
+        data=LatestUploadDateResponse(
+            latest_upload_date=str(max_date) if max_date else None,
         ).model_dump()
     )

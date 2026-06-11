@@ -38,3 +38,4 @@ class OrderInfo(BaseModel):
     settlement_time: Optional[datetime] = Field(None, description="佣金结算时间")
     platform: Optional[str] = Field(None, description="平台")
     created_at: Optional[datetime] = Field(None, description="导入时间")
+    upload_date: Optional[str] = Field(None, description="上传日期")
