@@ -56,13 +56,13 @@ app.include_router(daren_router, prefix="/api/v1")
 app.add_middleware(RequestLoggingMiddleware)
 
 
-@app.get("/", response_model=APIResponse, summary="服务根路径", description="返回服务基本信息，确认服务是否正常运行。")
+@app.get("/", response_model=APIResponse[None], summary="服务根路径", description="返回服务基本信息，确认服务是否正常运行。")
 async def root():
     """服务根路径"""
     return success(message="OpenAPI Service is running")
 
 
-@app.get("/api/v1/health", response_model=APIResponse, summary="健康检查", description="健康检查接口，用于监控服务运行状态。返回 OK 表示服务正常。")
+@app.get("/api/v1/health", response_model=APIResponse[None], summary="健康检查", description="健康检查接口，用于监控服务运行状态。返回 OK 表示服务正常。")
 async def health_check():
     """健康检查"""
     return success(message="OK")

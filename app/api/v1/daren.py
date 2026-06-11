@@ -19,7 +19,7 @@ logger = logging.getLogger("openapi-service")
 router = APIRouter(prefix="/daren", tags=["达人数据"])
 
 
-@router.post("/upload", response_model=APIResponse, summary="上传导入达人订单",
+@router.post("/upload", response_model=APIResponse[UploadResult], summary="上传导入达人订单",
              description="上传 .xlsx 格式的达人订单文件，解析后批量导入数据库。文件需符合指定格式（30列表头完全一致）。需要携带有效的 API Key 进行身份认证。",
              response_description="导入结果，data 结构见 UploadResult")
 async def upload_orders(
@@ -47,7 +47,7 @@ async def upload_orders(
                 success_rows=0,
                 failed_rows=0,
                 failures=[{"row": 0, "reason": e.message}],
-            ).model_dump(),
+            ),
             message=f"文件校验失败：{e.message}",
         )
     except ValueError as e:
@@ -58,7 +58,7 @@ async def upload_orders(
                 success_rows=0,
                 failed_rows=0,
                 failures=[{"row": 0, "reason": str(e)}],
-            ).model_dump(),
+            ),
             message=f"文件格式错误：{str(e)}",
         )
 
@@ -71,7 +71,7 @@ async def upload_orders(
                 success_rows=0,
                 failed_rows=parse_result.failed_rows,
                 failures=parse_result.failures,
-            ).model_dump(),
+            ),
             message="文件中没有有效的订单数据",
         )
 
@@ -97,15 +97,15 @@ async def upload_orders(
     )
 
     if result.failed_rows == 0:
-        return success(data=result.model_dump(), message=f"导入成功，共 {result.success_rows} 条记录")
+        return success(data=result, message=f"导入成功，共 {result.success_rows} 条记录")
     else:
         return success(
-            data=result.model_dump(),
+            data=result,
             message=f"导入完成（成功 {result.success_rows} 条，失败 {result.failed_rows} 条）",
         )
 
 
-@router.get("/orders", response_model=APIResponse, summary="查询达人订单列表",
+@router.get("/orders", response_model=APIResponse[PageResponse[OrderInfo]], summary="查询达人订单列表",
             description="分页查询已导入的达人订单数据，支持按达人用户名和订单状态筛选。需要携带有效的 API Key 进行身份认证。",
             response_description="分页订单列表，data 结构为 PageResponse[OrderInfo]")
 async def list_orders(
@@ -167,11 +167,11 @@ async def list_orders(
                 )
                 for item in items
             ],
-        ).model_dump()
+        )
     )
 
 
-@router.get("/latest-upload-date", response_model=APIResponse, summary="查询最大上传日期",
+@router.get("/latest-upload-date", response_model=APIResponse[LatestUploadDateResponse], summary="查询最大上传日期",
             description="查询已导入的达人订单数据中最大的上传日期，用于了解数据同步进度。需要携带有效的 API Key 进行身份认证。",
             response_description="最大上传日期，data 结构见 LatestUploadDateResponse")
 async def latest_upload_date(
@@ -183,5 +183,5 @@ async def latest_upload_date(
     return success(
         data=LatestUploadDateResponse(
             latest_upload_date=str(max_date) if max_date else None,
-        ).model_dump()
+        )
     )

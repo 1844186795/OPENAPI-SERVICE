@@ -11,7 +11,7 @@ from app.services import api_key as api_key_service
 router = APIRouter(prefix="/auth", tags=["认证中心"])
 
 
-@router.post("/apply", response_model=APIResponse, summary="申请 API Key",
+@router.post("/apply", response_model=APIResponse[ApiKeyCreateResponse], summary="申请 API Key",
              description="创建一个新的 API Key，返回 app_id 和 client_secret，client_secret 只会在创建时显示一次，请妥善保存。需要携带管理员密钥进行身份认证。",
              response_description="申请成功返回 app_id 和 client_secret，data 结构见 ApiKeyCreateResponse")
 async def apply_api_key(
@@ -47,7 +47,7 @@ async def apply_api_key(
     )
 
 
-@router.get("/keys", response_model=APIResponse, summary="获取 API Key 列表",
+@router.get("/keys", response_model=APIResponse[ApiKeyListResponse], summary="获取 API Key 列表",
             description="获取所有已申请的 API Key 列表，需要携带管理员密钥进行身份认证。",
             response_description="返回 API Key 列表，data 结构见 ApiKeyListResponse")
 async def list_api_keys(
@@ -75,7 +75,7 @@ async def list_api_keys(
     )
 
 
-@router.post("/revoke", response_model=APIResponse, summary="撤销 API Key",
+@router.post("/revoke", response_model=APIResponse[None], summary="撤销 API Key",
              description="根据 app_id 撤销指定的 API Key，撤销后该 Key 将无法继续使用。需要携带管理员密钥进行身份认证。",
              response_description="撤销成功仅返回 message，无 data 内容")
 async def revoke_api_key(

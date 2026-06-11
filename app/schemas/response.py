@@ -27,18 +27,18 @@ class LatestUploadDateResponse(BaseModel):
     latest_upload_date: Optional[str] = Field(None, description="最大上传日期，格式 yyyy-MM-dd")
 
 
-class APIResponse(BaseModel):
+class APIResponse(BaseModel, Generic[DataT]):
     """统一响应格式"""
     code: int = 0
     message: str = "success"
-    data: Optional[Any] = None
+    data: Optional[DataT] = None
 
 
-def success(data: Any = None, message: str = "success") -> APIResponse:
+def success(data: Any = None, message: str = "success") -> APIResponse[Any]:
     """构造成功响应"""
-    return APIResponse(code=0, message=message, data=data)
+    return APIResponse[Any](code=0, message=message, data=data)
 
 
-def error(code: int, message: str, data: Any = None) -> APIResponse:
+def error(code: int, message: str, data: Any = None) -> APIResponse[Any]:
     """构造错误响应"""
-    return APIResponse(code=code, message=message, data=data)
+    return APIResponse[Any](code=code, message=message, data=data)
