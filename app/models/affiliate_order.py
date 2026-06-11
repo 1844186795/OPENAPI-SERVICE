@@ -48,7 +48,7 @@ class AffiliateOrder(BaseModel):
     actual_joint_bonus: Mapped[float | None] = mapped_column(DECIMAL(10, 2), nullable=True, comment="实际合资达人奖金")
 
     # 时间信息
-    created_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="订单创建时间")
+    created_time: Mapped[datetime | None] = mapped_column(DateTime, index=True, nullable=True, comment="订单创建时间")
     payment_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="支付时间")
     delivery_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="订单送达时间")
     settlement_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="佣金结算时间")
