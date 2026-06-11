@@ -11,7 +11,7 @@ from app.core.security.deps import require_auth, require_auth_simple
 from app.database import get_db
 from app.models.api_key import ApiKey
 from app.schemas.daren import OrderInfo
-from app.schemas.response import APIResponse, LatestUploadDateResponse, PageResponse, UploadResult, success
+from app.schemas.response import APIResponse, LatestCreateTimeResponse, LatestUploadDateResponse, PageResponse, UploadResult, success
 from app.services import daren as daren_service
 
 logger = logging.getLogger("openapi-service")
@@ -183,5 +183,21 @@ async def latest_upload_date(
     return success(
         data=LatestUploadDateResponse(
             latest_upload_date=str(max_date) if max_date else None,
+        )
+    )
+
+
+@router.get("/latest-create-time", response_model=APIResponse[LatestCreateTimeResponse], summary="查询最大订单创建日期",
+             description="查询已导入的达人订单数据中最大的订单创建日期（仅日期，不含时间），用于了解最新订单数据的时间范围。需要携带有效的 API Key 进行身份认证。",
+             response_description="最大订单创建日期，data 结构见 LatestCreateTimeResponse")
+async def latest_create_time(
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_auth),
+):
+    """查询最大订单创建日期"""
+    max_date = await daren_service.get_latest_create_time(db)
+    return success(
+        data=LatestCreateTimeResponse(
+            latest_create_time=max_date,
         )
     )

@@ -27,6 +27,11 @@ class LatestUploadDateResponse(BaseModel):
     latest_upload_date: Optional[str] = Field(None, description="最大上传日期，格式 yyyy-MM-dd")
 
 
+class LatestCreateTimeResponse(BaseModel):
+    """最大订单创建时间响应"""
+    latest_create_time: Optional[str] = Field(None, description="最大订单创建日期，格式 yyyy-MM-dd")
+
+
 class APIResponse(BaseModel, Generic[DataT]):
     """统一响应格式"""
     code: int = Field(0, description="状态码，0 表示成功，非 0 表示错误")

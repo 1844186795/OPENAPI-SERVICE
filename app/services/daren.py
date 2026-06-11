@@ -116,3 +116,19 @@ async def get_latest_upload_date(db: AsyncSession) -> Optional[date]:
         select(func.max(AffiliateOrder.upload_date))
     )
     return result.scalar()
+
+
+async def get_latest_create_time(db: AsyncSession) -> Optional[str]:
+    """查询表中最大的订单创建日期
+
+    Args:
+        db: 数据库会话
+
+    Returns:
+        最大订单创建日期（yyyy-MM-dd），表为空时返回 None
+    """
+    result = await db.execute(
+        select(func.max(func.date(AffiliateOrder.created_time)))
+    )
+    max_date = result.scalar()
+    return str(max_date) if max_date else None
