@@ -11,7 +11,7 @@ from app.core.security.deps import require_auth, require_auth_simple
 from app.database import get_db
 from app.models.api_key import ApiKey
 from app.schemas.daren import OrderInfo
-from app.schemas.response import LatestUploadDateResponse, PageResponse, UploadResult, success
+from app.schemas.response import APIResponse, LatestUploadDateResponse, PageResponse, UploadResult, success
 from app.services import daren as daren_service
 
 logger = logging.getLogger("openapi-service")
@@ -19,8 +19,9 @@ logger = logging.getLogger("openapi-service")
 router = APIRouter(prefix="/daren", tags=["达人数据"])
 
 
-@router.post("/upload", response_model=None, summary="上传导入达人订单",
-             description="上传 .xlsx 格式的达人订单文件，解析后批量导入数据库。文件需符合指定格式（30列表头完全一致）。需要携带有效的 API Key 进行身份认证。")
+@router.post("/upload", response_model=APIResponse, summary="上传导入达人订单",
+             description="上传 .xlsx 格式的达人订单文件，解析后批量导入数据库。文件需符合指定格式（30列表头完全一致）。需要携带有效的 API Key 进行身份认证。",
+             response_description="导入结果，data 结构见 UploadResult")
 async def upload_orders(
     file: UploadFile = File(..., description="达人订单 Excel 文件（.xlsx）"),
     db: AsyncSession = Depends(get_db),
@@ -104,8 +105,9 @@ async def upload_orders(
         )
 
 
-@router.get("/orders", response_model=None, summary="查询达人订单列表",
-            description="分页查询已导入的达人订单数据，支持按达人用户名和订单状态筛选。需要携带有效的 API Key 进行身份认证。")
+@router.get("/orders", response_model=APIResponse, summary="查询达人订单列表",
+            description="分页查询已导入的达人订单数据，支持按达人用户名和订单状态筛选。需要携带有效的 API Key 进行身份认证。",
+            response_description="分页订单列表，data 结构为 PageResponse[OrderInfo]")
 async def list_orders(
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页条数"),
@@ -169,8 +171,9 @@ async def list_orders(
     )
 
 
-@router.get("/latest-upload-date", response_model=None, summary="查询最大上传日期",
-            description="查询已导入的达人订单数据中最大的上传日期，用于了解数据同步进度。需要携带有效的 API Key 进行身份认证。")
+@router.get("/latest-upload-date", response_model=APIResponse, summary="查询最大上传日期",
+            description="查询已导入的达人订单数据中最大的上传日期，用于了解数据同步进度。需要携带有效的 API Key 进行身份认证。",
+            response_description="最大上传日期，data 结构见 LatestUploadDateResponse")
 async def latest_upload_date(
     db: AsyncSession = Depends(get_db),
     _: ApiKey = Depends(require_auth),

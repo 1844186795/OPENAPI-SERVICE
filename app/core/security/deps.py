@@ -32,11 +32,10 @@ async def require_auth(
     if not api_key:
         raise AuthenticationError("无效的 API Key")
 
-    # 检查是否过期，若过期则同步更新状态
+    # 检查是否过期，若过期则同步更新状态并提交
     if api_key.expires_at and time.time() > api_key.expires_at.timestamp():
         api_key.status = "expired"
-        db.add(api_key)
-        await db.flush()
+        await db.commit()
         raise ApiKeyExpiredError()
 
     body = None
@@ -85,11 +84,10 @@ async def require_auth_simple(
     if not api_key:
         raise AuthenticationError("无效的 API Key")
 
-    # 检查是否过期，若过期则同步更新状态
+    # 检查是否过期，若过期则同步更新状态并提交
     if api_key.expires_at and time.time() > api_key.expires_at.timestamp():
         api_key.status = "expired"
-        db.add(api_key)
-        await db.flush()
+        await db.commit()
         raise ApiKeyExpiredError()
 
     # 校验签名但不读取 body（文件上传场景 body 为二进制数据）
